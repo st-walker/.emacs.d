@@ -1,0 +1,15 @@
+secrets.el
+*~
+.cache/*
+.emacs.desktop*
+.lsp-session*
+bookmarks
+elpa/*
+history
+ielm-history.eld
+multisession/*
+projects
+transient/*
+.aider*
+var/*
+eln-cache/*
