@@ -9,12 +9,12 @@
  '(ispell-dictionary "british")
  '(marginalia-mode-hook '(nerd-icons-completion-marginalia-setup))
  '(ns-function-modifier 'hyper)
+ '(org-startup-with-latex-preview t)
  '(package-selected-packages
-   '(aider company consult-flycheck embark embark-consult envrc
-	   exec-path-from-shell exec-path-from-shell-initialize
-	   flycheck list-packages-ext lsp-pyright lsp-ui marginalia
-	   nerd-icons nerd-icons-completion no-littering orderless
-	   vertico which-key zenburn-theme))
+   '(aidermacs autothemer casual catppuccin-theme embark-consult envrc
+	       exec-path-from-shell gptel lsp-pyright magit marginalia
+	       nerd-icons-completion nerd-icons-dired no-littering
+	       orderless password-store vertico))
  '(ring-bell-function 'ignore)
  '(scroll-bar-mode nil)
  '(tab-bar-history-mode t)

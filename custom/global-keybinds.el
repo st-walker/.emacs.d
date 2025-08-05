@@ -1,7 +1,7 @@
 ;; Disable annoying C-z minimise emacs.
 (keymap-global-unset "C-z")
 ;; Disable annoying accidentally closing emacs
-(keymap-global-unset "C-x C-c")
+;; (keymap-global-unset "C-x C-c")
 ;;An improved buffer list
 (global-set-key (kbd "M-o") 'other-window)
 (global-set-key [remap list-buffers] 'ibuffer)
@@ -34,7 +34,7 @@
 (lambda ()
   (interactive)
   (let ((path (shell-command-to-string "pwd")))
-    (shell-command (format "printf %%q\\n %s | pbcopy" (string-trim path)))
+    (shell-command (format "printf %%q %s | pbcopy" (string-trim path)))
     (message "Copied path: %s" (string-trim path)))))
 
 (global-set-key (kbd "H-w")
@@ -43,4 +43,3 @@
 		    (delete-trailing-whitespace)
 		  (message "Deleted trailing whitespace")
 		  )))
-

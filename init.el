@@ -1,13 +1,20 @@
-(setq custom-file "~/.emacs.d/emacs-custom.el")
+(setq custom-file "~/.emacs.d/custom/emacs-custom.el")
 (load custom-file)
-(setq global-keybinds-file "~/.emacs.d/global-keybinds.el")
-(load global-keybinds-file)
-(let ((secrets-file "~/.emacs.d/secrets.el"))
-  (when (file-exists-p secrets-file)
-    (load secrets-file)))
+
+(load "~/.emacs.d/custom/global-keybinds.el")
+
+(use-package password-store
+  :ensure t)
+
+(add-hook 'aidermacs-before-run-backend-hook
+          (lambda ()
+            (setenv "OPENAI_API_KEY"
+                    (password-store-get "code/openai_api_key")))
+	  )
+
 
 (when (memq window-system '(mac ns x))
-  (load "~/.emacs.d/unset-macos-keybinds.el")
+  (load "~/.emacs.d/custom/unset-macos-keybinds.el")
   ;;fn -> Hyper.  Note that fn+media keys still function correctly.
   (setq ns-function-modifier 'hyper)
   (exec-path-from-shell-initialize))
@@ -29,25 +36,31 @@
     (setq lock-file-name-transforms `((".*" ,dir t))))
   )
 
-(use-package aider
+(use-package aidermacs
+  :bind (("C-c a" . aidermacs-transient-menu))
+  :config
+					; Set API_KEY in .bashrc, that will automatically picked up by aider or in elisp
+  ;; (setenv "ANTHROPIC_API_KEY" "sk-...")
+					; defun my-get-openrouter-api-key yourself elsewhere for security reasons
+  (setenv "OPENAI_API_KEY" (password-store-get "code/openai_api_key"))
+  (setenv "OPENROUTER_API_KEY" (password-store-get "code/openrouter_api_key"))
+  :custom
+					; See the Configuration section below
+  (aidermacs-default-chat-mode 'architect)
+  (aidermacs-default-model "sonnet"))
+
+
+(use-package gptel
   :ensure t
   :config
-  ;; For latest claude sonnet model
-  ;; (setq aider-args '("--model" "sonnet" "--no-auto-accept-architect"))
-  ;; (setenv "ANTHROPIC_API_KEY" anthropic-api-key)
-  ;; Or chatgpt model
-  ;; (setq aider-args '("--model" "o4-mini"))
-  (setenv "OPENAI_API_KEY"  (cdr (assoc 'OPENAI_API_KEY my/secrets)))
-  ;; Or use your personal config file
-  ;; (setq aider-args `("--config" ,(expand-file-name "~/.aider.conf.yml")))
-  ;; ;;
-  ;; Optional: Set a key binding for the transient menu
-  (global-set-key (kbd "C-c a") 'aider-translient-menu) ;; for wider screen
-  ;; or use aider-transient-menu-2cols / aider-transient-menu-1col, for narrow screen
-  (aider-magit-setup-transients)) ;; add aider magit function to magit menu
+  (setq gptel-api-key (password-store-get "code/openai_api_key"))
+  ;; Optional: use GPT-4 instead of GPT-3.5
+  ;; (setq gptel-model 'ChatGPT:gpt-4o)
+  ;; Optional: set the base endpoint if using a different provider
+  ;; (setq gptel-endpoint "https://api.openai.com/v1/chat/completions")
+  )
 
-
-;; Example configuration for Consult
+;; Example configuration for Consulot
 (use-package consult
   ;; Replace bindings. Lazily loaded by `use-package'.
   :bind (;; C-c bindings in `mode-specific-map'
@@ -148,7 +161,7 @@
   ;; Optionally make narrowing help available in the minibuffer.
   ;; You may want to use `embark-prefix-help-command' or which-key instead.
   ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
-)
+  )
 
 ;; LSP Performance improvements.  See https://emacs-lsp.github.io/lsp-mode/page/performance/
 ;; Check with (lsp-doctor)
@@ -160,8 +173,8 @@
   :ensure t
   :custom (lsp-pyright-langserver-command "pyright") ;; or basedpyright
   :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp))))  ; or lsp-deferred
+                         (require 'lsp-pyright)
+                         (lsp))))  ; or lsp-deferred
 
 (with-eval-after-load 'lsp-ui
   ;; Remap `xref-find-definitions' (bound to M-. by default)
@@ -174,10 +187,6 @@
               [remap xref-find-references]
               #'lsp-ui-peek-find-references))
 
-
-
-
-
 ;; Enable Vertico.
 ;; https://github.com/minad/vertico
 (use-package vertico
@@ -187,6 +196,7 @@
 
 ;; Persist history over Emacs restarts. Vertico sorts by history position.
 (use-package savehist
+  :ensure t
   :init
   (savehist-mode))
 
@@ -224,6 +234,13 @@
   :config
   (marginalia-mode))
 
+(use-package nerd-icons-completion
+  :ensure t
+  :config
+  (nerd-icons-completion-mode)
+  :hook
+  ('marginalia-mode-hook . #'nerd-icons-completion-marginalia-setup)
+  )
 
 (use-package embark
   :ensure t
@@ -267,28 +284,29 @@
 
 (use-package nerd-icons
   :ensure t
-  ;; :custom
+  :custom
   ;; The Nerd Font you want to use in GUI
   ;; "Symbols Nerd Font Mono" is the default and is recommended
   ;; but you can use any other Nerd Font if you want
-  ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
+  ;; Downloaded from https://www.nerdfonts.com/font-downloads
+  (nerd-icons-font-family "SauceCodePro Nerd Font Mono")
   )
 
-(use-package zenburn-theme
+(use-package nerd-icons-dired
   :ensure t
-  :init
-  ;; use variable-pitch fonts for some headings and titles
-  (setq zenburn-use-variable-pitch t)
+  :hook
+  (dired-mode . nerd-icons-dired-mode)
+  )
 
-  ;; scale headings in org-mode
-  (setq zenburn-scale-org-headlines t)
-
-  ;; scale headings in outline-mode
-  (setq zenburn-scale-outline-headlines t)
-
+(use-package catppuccin-theme
+  :ensure t
+  :custom
+  (catppuccin-flavor 'latte)
   :config
-  (load-theme 'zenburn t)
-)
+  (load-theme 'catppuccin :no-confirm)
+  :hook
+  ('server-after-make-frame-hook . #'catppuccin-reload) ; https://github.com/catppuccin/emacs?tab=readme-ov-file#configuration
+  )
 
 (put 'downcase-region 'disabled nil)
 
@@ -309,14 +327,38 @@
   ;; Set dired-x global variables here.  For example:
   ;; (setq dired-x-hands-off-my-keys nil)
   )
+
 (add-hook 'dired-mode-hook
           (lambda ()
             ;; Set dired-x buffer-local variables here.  For example:
             ;; (dired-omit-mode 1)
             ))
 
+(use-package magit
+  :ensure t
+  :bind (("C-x g" . magit-status))
+  :custom (magit-save-repository-buffers 'dontask)
+  (git-commit-summary-max-length 50)
+  
+  :custom-face
+  ;; Quick and dirty to get it working with the cappuci theme
+  ;; TODO: Make this fit with the existing theme using catppuccin-flavor-alist or something...
+  (git-commit-overlong-summary ((t (:background "red" :foreground "white" :weight bold))))
+  )
+
+(use-package casual
+  :ensure t
+  :config
+  (with-eval-after-load 'calc
+    (keymap-set calc-mode-map "C-o" #'casual-calc-tmenu))
+  ;; Uncomment this line if you also want to set it for calc-alg-map
+  (with-eval-after-load 'calc
+    (keymap-set calc-alg-map "C-o" #'casual-calc-tmenu))
+)
+
 (use-package envrc
   :ensure t
   :hook (after-init . envrc-global-mode))
+
 
 (server-start)
