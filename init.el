@@ -1,3 +1,14 @@
+;;; init.el --- My main file for configuring Emacs  -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; This file contains my Emacs configuraiton.  It is not entirely
+;; self-contained and includes some other .el files in
+;; ~/.emacs.d/custom/ as well as a password file using pass for LLM
+;; API keys.
+
+;;; Code:
+
 (setq custom-file "~/.emacs.d/custom/emacs-custom.el")
 (load custom-file)
 
@@ -17,7 +28,10 @@
   (load "~/.emacs.d/custom/unset-macos-keybinds.el")
   ;;fn -> Hyper.  Note that fn+media keys still function correctly.
   (setq ns-function-modifier 'hyper)
-  (exec-path-from-shell-initialize))
+  (use-package exec-path-from-shell
+    :ensure t
+    :config
+    (exec-path-from-shell-initialize))
 
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
@@ -168,6 +182,9 @@
 (setq gc-cons-threshold 100000000)
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
 
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
 
 (use-package lsp-pyright
   :ensure t
@@ -175,6 +192,10 @@
   :hook (python-mode . (lambda ()
                          (require 'lsp-pyright)
                          (lsp))))  ; or lsp-deferred
+
+(use-package lsp-ui
+  :ensure t
+)
 
 (with-eval-after-load 'lsp-ui
   ;; Remap `xref-find-definitions' (bound to M-. by default)
@@ -360,5 +381,7 @@
   :ensure t
   :hook (after-init . envrc-global-mode))
 
-
 (server-start)
+
+(provide 'init)
+;;; init.el ends here

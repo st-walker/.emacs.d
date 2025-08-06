@@ -12,9 +12,9 @@
  '(org-startup-with-latex-preview t)
  '(package-selected-packages
    '(aidermacs autothemer casual catppuccin-theme embark-consult envrc
-	       exec-path-from-shell gptel lsp-pyright magit marginalia
-	       nerd-icons-completion nerd-icons-dired no-littering
-	       orderless password-store vertico))
+	       exec-path-from-shell flycheck gptel lsp-pyright lsp-ui
+	       magit marginalia nerd-icons-completion nerd-icons-dired
+	       no-littering orderless password-store vertico))
  '(ring-bell-function 'ignore)
  '(scroll-bar-mode nil)
  '(tab-bar-history-mode t)
